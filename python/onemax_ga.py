@@ -63,16 +63,22 @@ def mutation(ind1):
 			ind2[i] = random.randint(0,1)
 	return ind2
 
-population = []
-for i in range(POPULATION_SIZE):
-	individual = []
-	for j in range(LIST_SIZE):
+# --------------------
+# メイン処理
+# --------------------
+
+# (1)初期集団を生成
+population = [] # 集団
+for i in range(POPULATION_SIZE) :
+	individual = [] # 個体
+	for j in range(LIST_SIZE) :
 		individual.append(random.randint(0,1))
 	population.append(individual)
 
 for generation in range(GENERATION) :
 	print(str(generation+1) + u"世代")
 
+	# (2)選択
 	population = selection(population)
 
 	n = POPULATION_SIZE - len(population)
@@ -80,10 +86,13 @@ for generation in range(GENERATION) :
 		r1 = random.randint(0,len(population)-1)
 		r2 = random.randint(0,len(population)-1)
 
+		# (3)交叉
 		individual = crossover(population[r1], population[r2])
 
+		# (4)突然変異
 		individual = mutation(individual)
 
+		# 集団に追加
 		population.append(individual)
 
 	for individual in population :
