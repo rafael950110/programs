@@ -4,11 +4,11 @@ import random
 import copy
 
 # パラメータ
-LIST_SIZE 			= 10		# 0/1のリスト長（遺伝子長）
-POPULATION_SIZE = 10		# 集団の個体数
-GENERATION 			= 25		# 世代数
-MUTATE 					= 0.1		# 突然変異の確率
-SELECT_RATE 		= 0.5		# 選択割合
+LIST_SIZE 		= 10	# 0/1のリスト長（遺伝子長）
+POPULATION_SIZE = 10	# 集団の個体数
+GENERATION 		= 25	# 世代数
+MUTATE 			= 0.1	# 突然変異の確率
+SELECT_RATE 	= 0.5	# 選択割合
 
 
 # --------------------
