@@ -5,25 +5,30 @@ import copy
 from PIL import Image
 import numpy as np
 
-# 元となる画像の読み込み
-img = Image.open('ueda.jpg')
-#オリジナル画像の幅と高さを取得
-width, height = img.size
-img_pixels = np.array([[img.getpixel((i,j)) for j in range(height)] for i in range(width)])
-dna_pixels = np.array([[[[random.randint(1,255)] for k in range(3)] for j in range(height)] for i in range(width)])
-
 # パラメータ
 LIST_SIZE 		= 10	# 0/1のリスト長（遺伝子長）
-POPULATION_SIZE = 10	# 集団の個体数
+POPULATION_SIZE = 100	# 集団の個体数
 GENERATION 		= 25	# 世代数
-MUTATE 			= 0.1	# 突然変異の確率
-SELECT_RATE 	= 0.5	# 選択割合
+MUTATE 			= 0.5	# 突然変異の確率
+SELECT_RATE 	= 0.2	# 選択割合
 
+# 元となる画像の読み込み
+ueda = Image.open('ueda.jpg').convert('RGB')
+ueda_pixels = np.asarray(ueda, np.uint8)
+width, height = len(ueda_pixels), len(ueda_pixels[0])
 
 # --------------------
 # 適応度の計算
-def calc_fitness(individual):
-	return sum(individual)
+def calc_fitness(individual, original, width, height):
+	sum_distance = 0
+	for i in range(width) :
+		for j in range(height) :
+			r0, g0, b0 = original[i][j]
+			r1, g1, b1 = individual[i][j]
+			sum_distance += int(np.sqrt(  (r1 - r0 ) ** 2 \
+										+ (g1 - g0 ) ** 2 \
+										+ (b1 - b0 ) ** 2 ))
+	return sum_distance
 
 # --------------------
 # 集団を適応度順にソート
@@ -32,9 +37,9 @@ def sort_fitness(population):
 
 	# 集団ごとに適応度の計算
 	for individual in population :
-		fitness = calc_fitness(individual)
+		fitness = calc_fitness(individual, ueda_pixels, width, height)
 		fp.append((fitness,individual))
-	fp.sort(reverse=True)
+	fp.sort(reverse=True, key=lambda x: x[0])
 
 	# 適応度で降順にソート
 	sorted_population = []
@@ -55,7 +60,8 @@ def selection(population):
 
 # --------------------
 # (3)交叉：ind1をind2のランダムな範囲の遺伝子で書き換える
-def crossover(ind1, ind2):
+def crossover(ind1, ind2) :
+	LIST_SIZE = len(ind1)
 	r1 = random.randint(0, LIST_SIZE-1)
 	r2 = random.randint(r1+1, LIST_SIZE)
 	ind = copy.deepcopy(ind1)
@@ -77,12 +83,14 @@ def mutation(ind1):
 # --------------------
 
 # (1)初期集団を生成
-population = [] # 集団
+population = np.array([]) # 集団
 for i in range(POPULATION_SIZE) :
-	individual = [] # 個体
-	for j in range(LIST_SIZE) :
-		individual.append(random.randint(0,1))
-	population.append(individual)
+	# 元画像と同じサイズでランダムな色
+	individual = np.array([[[[random.randint(1,255)] 	\
+								for k in range(3)] 		\
+								for j in range(height)] \
+								for i in range(width)], np.uint8)
+	np.append(population, individual)
 
 for generation in range(GENERATION) :
 	print(str(generation+1) + u"世代")
@@ -104,5 +112,6 @@ for generation in range(GENERATION) :
 		# 集団に追加
 		population.append(individual)
 
-	for individual in population :
-		print(individual)
+	ueda_kids = Image.fromarray(np.uint8(population[0]))
+	ueda_kids.save(u"上田キッズ" + str(generation+1) + "世代目.jpg")
+ueda_kids.show()
