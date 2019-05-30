@@ -15,7 +15,7 @@ SELECT_RATE = 0.5
 
 # --------------------
 # 経路の距離計算（個体の適応度計算）
-def calc_distance(points, route) :
+def calc_distance (points, route) :
 	distance = 0
 	for i in range(POINTS_SIZE) :
 		x0, y0 = points[route[i]]
@@ -103,9 +103,59 @@ def mutation(ind1) :
 
 	return ind2
 
+def canvas_print(canvas_list, population, points) :
+	for ind in range(POPULATION_SIZE) :
+		canvas = canvas_list[ind]
+		route = population[ind]
+		dist = calc_distance(points, route)
+		canvas.delete('all')
+		for i in range(POINTS_SIZE) :
+			x0, y0 = points[route[i]]
+			if i == POINTS_SIZE - 1 :
+				x1, y1 = points[route[0]]
+			else :
+				x1, y1 = points[route[i+1]]
+
+			# 経路の描画
+			canvas.create_line( \
+				x0 * SCREEN_WIDTH,	\
+				y0 * SCREEN_HEIGHT,	\
+				x1 * SCREEN_WIDTH,	\
+				y1 * SCREEN_HEIGHT,	\
+				fill="black", width=1)
+
+			# 都市の描画
+			canvas.create_oval( \
+				x0 * SCREEN_WIDTH  - 3,	\
+				y0 * SCREEN_HEIGHT - 3,	\
+				x0 * SCREEN_WIDTH  + 3,	\
+				y0 * SCREEN_HEIGHT + 3,	fill="blue")
+
+		canvas.create_rectangle( \
+			0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, \
+			outline = "gray", width=1)
+
+		canvas.create_text( \
+			5, 5, text = "{:.2f}".format(dist), \
+			anchor = "nw", fill = "red")
+
+	canvas.update()
+
 
 # --------------------
 # メイン処理
+print("都市数と世代数を入力してください")
+print("  都市数：", end='')
+point = input()
+print("  世代数：", end='')
+genel = input()
+
+if point :
+	POINTS_SIZE = int(point)
+if genel :
+	GENERATION = int(genel)
+elif not point :
+	print("都市数：{} \t 世代数：{}".format(POINTS_SIZE, GENERATION))
 
 # ウィンドウ初期化
 root = tkinter.Tk()
@@ -142,7 +192,6 @@ for i in range(POPULATION_SIZE) :
 	population.append(individual)
 
 for generation in range(GENERATION) :
-	root.title(u"GA TSP （" + str(generation + 1) + "世代）")
 
 	# 選択
 	population = selection(points, population)
@@ -160,46 +209,13 @@ for generation in range(GENERATION) :
 		# 集団に追加
 		population.append(individual)
 
-	if generation % 500 : continue
-
 	# 集団を適応度順にソート
 	sort_fitness(points, population)
 
-	for ind in range(POPULATION_SIZE) :
-		canvas = canvas_list[ind]
-		route = population[ind]
-		dist = calc_distance(points, route)
-		canvas.delete('all')
-		for i in range(POINTS_SIZE) :
-			x0, y0 = points[route[i]]
-			if i == POINTS_SIZE - 1 :
-				x1, y1 = points[route[0]]
-			else :
-				x1, y1 = points[route[i+1]]
+	if not generation % int(GENERATION/10) :
+		root.title(u"GA TSP （" + str(generation) + "世代）")
+		canvas_print(canvas_list, population, points)
 
-			# 経路の描画
-			canvas.create_line( \
-				x0 * SCREEN_WIDTH,	\
-				y0 * SCREEN_HEIGHT,	\
-				x1 * SCREEN_WIDTH,	\
-				y1 * SCREEN_HEIGHT,	\
-				fill="black", width=1)
-
-			# 都市の描画
-			canvas.create_oval( \
-				x0 * SCREEN_WIDTH  - 3,	\
-				y0 * SCREEN_HEIGHT - 3,	\
-				x0 * SCREEN_WIDTH  + 3,	\
-				y0 * SCREEN_HEIGHT + 3,	fill="blue")
-
-		canvas.create_rectangle( \
-			0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1, \
-			outline = "gray", width=1)
-
-		canvas.create_text( \
-			5, 5, text = "{:.2f}".format(dist), \
-			anchor = "nw", fill = "red")
-
-		canvas.update()
-
+root.title(u"GA TSP （" + str(GENERATION) + "世代）")
+canvas_print(canvas_list, population, points)
 root.mainloop()
