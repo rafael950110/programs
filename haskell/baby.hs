@@ -4,6 +4,14 @@ import Debug.Trace
 --removeNonUppercase :: [Char] -> [Char]
 --removeNonUppercase st = [ c | c <-st, c `elme` ['A'..'Z']]
 
+doubleMe :: Int -> Int
+doubleMe x = x + x
+
+--doubleUs x y = x*2 + y*2
+doubleUs x y = doubleMe x + doubleMe y
+
+doubleSmallNumber x = if x > 100 then x else x*2
+
 addThree :: Int -> Int -> Int -> Int
 addThree x y z = x + y+ z
 
@@ -42,6 +50,7 @@ first (x:_) = x
 
 length' [] = 0
 length' (_:xs) = 1 + length' xs
+--length' xs = sum [1 | _ <- xs]
 
 sum' :: Num t => [t] -> t
 sum' [] = 0

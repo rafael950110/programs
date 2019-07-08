@@ -10,30 +10,15 @@ SCREEN_HEIGHT = 360
 OVAL = 5
 g = 9.8
 
-def calc_ball(x, y, th, l) :
-	return x + l*sin(th), y + l*cos(th)
-
-def calc_theta(th, dt, l) :
-	om = (G/l) * sin(np.radians(th)) * dt
-	return th + om
-
-def calc_v(l, th, high_th) :
-	return np.sqrt(2*g*l*(cos(th)-cos(high_th)))
-
-xO, yO = 180, 20
-m1 = 1
-l1 = 200
-th1 = 120.0
-
-x1, y1 = calc_ball(xO, yO, th1, l1)
-print(x1,y1)
-
-t  = 0.0
-dt = 0.05
-v = calc_v(l1, th, 120.0)
+the = np.pi/3
+l_len = 100
+ox, oy = 180, 100
+fx, fy = sin(the)*l_len + ox, cos(the)*l_len + oy
+dt = 0.1
+dx, dy = 0, 0
+vec = 0
 
 root = tkinter.Tk()
-root.title(u"random TSP")
 root.geometry(str(SCREEN_WIDTH) + "x" + str(SCREEN_HEIGHT))
 canvas = tkinter.Canvas(root, width = SCREEN_WIDTH, height = SCREEN_HEIGHT	)
 canvas.place(x=0, y=0)
@@ -44,8 +29,25 @@ while True :
 
 	canvas.delete('all')	# キャンバスをクリア
 
-	# canvas.create_line(xO, yO, x1, y1, fill='gray', width=2)
-	canvas.create_oval(x1 - OVAL, y1 - OVAL, x1 + OVAL, y1 + OVAL, fill='black')
+	# --- cos,sin calc
+	cos_t = (fy - oy) / np.sqrt( (fx-ox)**2 + (fy-oy)**2 )
+	sin_t = (fx - ox) / np.sqrt( (fx-ox)**2 + (fy-oy)**2 )
+
+	# --- dx,dy calc
+	# omg = -g / l_len * sin_t
+	# alp = omg * l_len
+	# vec += alp * dt
+	vec += -g * sin_t * dt
+	dx  = vec * cos_t * dt
+	dy  = -vec * sin_t * dt
+
+	# --- update fx,fy
+	fx += dx
+	fy += dy
+
+	canvas.create_oval(ox - OVAL, oy - OVAL, ox + OVAL, oy + OVAL)
+	canvas.create_oval(fx - OVAL, fy - OVAL, fx + OVAL, fy + OVAL, fill='black')
+	canvas.create_line(ox, oy, fx, fy,  fill="black", width=2)
 
 	canvas.update()
 
